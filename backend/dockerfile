@@ -1,0 +1,23 @@
+# Set up the PHP server
+FROM php:7.4-apache
+WORKDIR /var/www/html
+COPY ./backend .
+
+# Install PHP dependencies
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Install required dependencies
+RUN apt-get update \
+    && apt-get install -y wget \
+                          unzip
+
+# Install PHPUnit
+RUN wget https://phar.phpunit.de/phpunit-9.phar \
+    && chmod +x phpunit-9.phar \
+    && mv phpunit-9.phar /usr/local/bin/phpunit
+
+RUN phpunit --boostrap core/bootstrap.php /var/www/html/tests/TestService.php > /var/www/html/tests/testResults.txt
+RUN cat /var/www/html/tests/testResults.txt
+
+
+EXPOSE 80
